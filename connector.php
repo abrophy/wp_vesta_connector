@@ -7,3 +7,7 @@ class connector {
 }
 
 //TODO database connector class
+class db_connection {
+  function __construct(){
+  }
+}
