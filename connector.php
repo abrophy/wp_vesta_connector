@@ -1,7 +1,7 @@
 <?php
 
 class connector {
-  function __contruct(){
+  function __construct(){
     //TODO initialize the database connection here
   }
 }
