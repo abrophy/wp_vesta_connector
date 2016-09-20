@@ -1,8 +1,14 @@
 <?php
 // pull in values from environment variables
-$db_name = getenv('DB_NAME');
-$db_username = getenv('DB_USERNAME');
-$db_password = getenv('DB_PASSWORD');
+
+require_once "spyc/Spyc.php";
+$db_data = Spyc::YAMLLoad('db.yaml');
+
+echo var_dump($db_data);
+
+$db_name = $db_data['db_name'];
+$db_username = $db_data['db_username'];
+$db_password = $db_data['db_password'];
 
 //instantiate the connector
 $connector = new connector();
