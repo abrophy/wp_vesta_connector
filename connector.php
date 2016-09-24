@@ -49,7 +49,7 @@ class Connector {
   }
 
   function createNewUser($row){
-    $users = VestaUser($row);
+    $users = new VestaUser($row);
   }
 }
 
