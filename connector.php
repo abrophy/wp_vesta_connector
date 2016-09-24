@@ -40,17 +40,14 @@ class Connector {
       // output data of each row
       while($row = $result->fetch_assoc()) {
         //TODO for each row create a new user and push it to the array
-        echo 'CREATING USER INSTANCE: name: ' . $row['meta_value'];
-        $this->createNewUser($row);
+        echo 'CREATING USER INSTANCE: name: ' . $row['meta_value'] . "\n";
+	$this->users[] = new VestaUser($row);
       }
     } else {
-      echo '0 results';
+      echo "0 results\n";
     }
   }
 
-  function createNewUser($row){
-    $users = new VestaUser($row);
-  }
 }
 
 class VestaUser {
@@ -59,21 +56,23 @@ class VestaUser {
   public $userName;
 
   function __construct($row){
-    $this->userId = $row('user_id');
-    $this->userName = $row('meta_value');
+    $this->userId = $row['user_id'];
+    $this->userName = $row['meta_value'];
   }
 
   public function updateSubscriptionData($conn){
     $sql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "ms_subscriptions" AND WHERE user_id = ' . $this->userId ;
+echo "USER ID SQL STRING\n";
+echo $sql . "\n";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
       // output data of each row
       while($row = $result->fetch_assoc()) {
-        echo 'UPDATING SUBS DATA: name: ' . $this->userName;
+        echo 'UPDATING SUBS DATA: name: ' . $this->userName . "\n";
         $this->subscriptions = ($row['meta_value']);
       }
     } else {
-      echo '0 results';
+      echo "0 results\n";
     }
   }
 }
