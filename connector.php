@@ -61,7 +61,7 @@ class VestaUser {
   }
 
   public function updateSubscriptionData($conn){
-    $sql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "ms_subscriptions" AND WHERE user_id = ' . $this->userId ;
+    $sql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "ms_subscriptions" AND user_id = ' . $this->userId ;
 echo "USER ID SQL STRING\n";
 echo $sql . "\n";
     $result = $conn->query($sql);
