@@ -11,13 +11,14 @@ $db_username = $db_data['db_username'];
 $db_password = $db_data['db_password'];
 
 //instantiate the Connector
-$connector = new Connector();
+$connector = new Connector($db_username, $db_password, $db_name );
 
 class Connector {
   public $users = [];
 
-  function __construct(){
-    $conn = new mysqli($db_name, $db_username, $db_password);
+  function __construct($db_username, $db_password, $db_name) {
+//Note currently configured to work with local DB's only
+    $conn = new mysqli('localhost', $db_username, $db_password, $db_name );
     if ($conn->connect_error) {
           die('Connection failed: ' . $conn->connect_error);
     }
