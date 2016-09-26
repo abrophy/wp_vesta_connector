@@ -93,4 +93,41 @@ class VestaApi {
     $this->vst_returncode = 'yes';
   }
 
+  public function createNewUser($username, $password, $email, $package, $first_name){
+
+    // Prepare POST query
+    $postvars = array(
+      'user' => $vst_username,
+      'password' => $vst_password,
+      'returncode' => $vst_returncode,
+      'cmd' => 'v-add-user',
+      'arg1' => $username,
+      'arg2' => $password,
+      'arg3' => $email,
+      'arg4' => $package,
+      'arg5' => $first_name,
+      'arg6' => $last_name
+    );
+    $postdata = http_build_query($postvars);
+
+    // Send POST query via cURL
+    $postdata = http_build_query($postvars);
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, 'https://' . $vst_hostname . ':8083/api/');
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($curl, CURLOPT_POST, true);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
+    $answer = curl_exec($curl);
+
+    // Check result
+    if($answer == 0) {
+      echo "User account has been successfuly created\n";
+      return true;
+    } else {
+      echo "Query returned error code: " .$answer. "\n";
+      return false;
+    }
+  }
 }
