@@ -1,13 +1,15 @@
 #Wordpress Vesta Connector
 
-is intended to synch users between a wordpress installation running WPMU Membership 2.0 and a local vesta control panel installation. Allowing the configured wordpress installation to act as a portal for vesta cp accounts.
+This script is intended to synch users between a wordpress installation running [WPMU Membership 2.0](https://premium.wpmudev.org/project/membership/) and a local vesta control panel installation. Allowing the configured wordpress installation to act as a portal for vesta cp accounts.
 
-## DATABASE CREDENTIALS
+## SETUP
 
-use the db.ini for database config.
- see example-db.ini
+### CONFIGURE DATABASE CREDENTIALS
 
-## VESTA CREDENTIALS
+Create a db.ini file for database credentials by copying
+[example-db.ini](./example-db.ini)
 
-use the vst.ini for vesta config.
-see example-vst.ini
+### CONFIGURE VESTA CREDENTIALS
+
+Create a vst.ini file for vesta credentials by copying
+[example-vst.ini](./example-vst.ini)
