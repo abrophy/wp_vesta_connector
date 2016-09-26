@@ -76,3 +76,21 @@ echo $sql . "\n";
   }
 }
 
+
+
+class VestaApi {
+
+  // Server credentials
+  private $vst_hostname;
+  private $vst_username;
+  private $vst_password;
+  private $vst_returncode;
+
+  function __construct($hostname, $username, $password){
+    $this->vst_hostname = $hostname;
+    $this->vst_username = $username;
+    $this->vst_password = $password;
+    $this->vst_returncode = 'yes';
+  }
+
+}
