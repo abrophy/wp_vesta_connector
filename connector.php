@@ -42,11 +42,11 @@ class Connector {
     if ($result->num_rows > 0) {
       // output data of each row
       while($row = $result->fetch_assoc()) {
-        //TODO for each row create a new user and push it to the array
         echo 'CREATING USER INSTANCE: name: ' . $row['meta_value'] . "\n";
 	$this->users[] = new VestaUser($row);
       }
     } else {
+      //TODO better handling of missing data here
       echo "0 results\n";
     }
   }
@@ -75,6 +75,7 @@ echo $sql . "\n";
         $this->subscriptions = (unserialize($row['meta_value']));
       }
     } else {
+      //TODO better handling of missing data here
       echo "0 results\n";
     }
   }
