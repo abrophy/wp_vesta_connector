@@ -88,6 +88,10 @@ echo $sql . "\n";
       echo "0 results\n";
     }
   }
+
+  public function getSubscriptionStatus(){
+    return $this->subscriptions->_saved_data['status'];
+  }
 }
 
 
