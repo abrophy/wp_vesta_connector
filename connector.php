@@ -55,7 +55,7 @@ class Connector {
 
 class VestaUser {
   public $userId;
-  public $subscriptions = "";
+  public $subscriptions;
   public $userName;
 
   function __construct($row){
@@ -72,7 +72,7 @@ echo $sql . "\n";
       // output data of each row
       while($row = $result->fetch_assoc()) {
         echo 'UPDATING SUBS DATA: name: ' . $this->userName . "\n";
-        $this->subscriptions = ($row['meta_value']);
+        $this->subscriptions = (unserialize($row['meta_value']));
       }
     } else {
       echo "0 results\n";
