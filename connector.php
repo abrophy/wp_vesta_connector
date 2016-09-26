@@ -1,8 +1,7 @@
 <?php
 // pull in values from environment variables
 
-require_once 'spyc/Spyc.php';
-$db_data = Spyc::YAMLLoad('db.yaml');
+$db_data = parse_ini_file("db.ini");
 
 echo var_dump($db_data);
 
