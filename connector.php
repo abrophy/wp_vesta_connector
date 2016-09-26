@@ -2,14 +2,18 @@
 // pull in values from environment variables
 
 $db_data = parse_ini_file("db.ini");
+$vst_data = parse_ini_file("vst.ini");
 
-echo var_dump($db_data);
+$vst_hostname = $vst_data['vst_hostname'];
+$vst_username = $vst_data['vst_username'];
+$vst_password = $vst_data['vst_password'];
 
 $db_name = $db_data['db_name'];
 $db_username = $db_data['db_username'];
 $db_password = $db_data['db_password'];
 
 //instantiate the Connector
+$api = new VestaApi($vst_hostname, $vst_username, $vst_password);
 $connector = new Connector($db_username, $db_password, $db_name );
 
 class Connector {
