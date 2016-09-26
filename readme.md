@@ -4,5 +4,10 @@ is intended to synch users between a wordpress installation running WPMU Members
 
 ## DATABASE CREDENTIALS
 
-use the db.yaml for database config.
- see example-db.yaml
+use the db.ini for database config.
+ see example-db.ini
+
+## VESTA CREDENTIALS
+
+use the vst.ini for vesta config.
+see example-vst.ini
