@@ -77,21 +77,40 @@ echo $sql . "\n";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {
       // output data of each row
-      while($row = $result->fetch_assoc()) {
-        echo 'UPDATING SUBS DATA: name: ' . $this->userName . "\n";
-        $subscriptions = unserialize($row['meta_value']);
-	if( count($subscriptions) > 0 ){
-		$subs_array = array();
-		foreach($subscriptions as $subs){
-			$subs_array[] = get_object_vars($subs);
-		}
-		$this->hasSubscriptions = true;
-		$this->subscriptions = $subs_array;
-	} else {
-		$this->hasSubscriptions = false;
-		$this->subscriptions = array();
-	}
-      }
+	    while($row = $result->fetch_assoc()) {
+		    echo 'UPDATING SUBS DATA: name: ' . $this->userName . "\n";
+		    $subscriptions = unserialize($row['meta_value']);
+
+		    /*These nested loops are required to pull the subs data out of a nested incomplete php object
+
+the reason it's so convoluted is due to php having trouble pulling out the membership object as it's a nested incomplete, can't be called by key as though it's part of an array, or as though the parent is an object
+		     */
+
+		    if( count($subscriptions) > 0 ){
+			    var_dump($subscriptions);
+			    $subs_array = array();
+			    foreach($subscriptions as $subs){
+				    $subs_inner_array = get_object_vars($subs);
+				    var_dump($subs_inner_array);
+
+				    $next_one_is_membership = false;
+				    foreach($subs_inner_array as $key => $value){
+					    if($next_one_is_membership){
+						    $next_one_is_membership = false;
+						    $subs_array[] = get_object_vars($value);
+					    }
+					    if($key == "\0*\0payment_type"){
+						    $next_one_is_membership = true;
+					    }
+				    }
+			    }
+			    $this->hasSubscriptions = true;
+			    $this->subscriptions = $subs_array;
+		    } else {
+			    $this->hasSubscriptions = false;
+			    $this->subscriptions = array();
+		    }
+	    }
     } else {
       //TODO better handling of missing data here
       echo "0 results\n";
