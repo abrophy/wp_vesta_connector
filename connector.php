@@ -73,7 +73,16 @@ echo $sql . "\n";
       // output data of each row
       while($row = $result->fetch_assoc()) {
         echo 'UPDATING SUBS DATA: name: ' . $this->userName . "\n";
-        $this->subscriptions = unserialize($row['meta_value']);
+        $subscriptions = unserialize($row['meta_value']);
+	if( count($subscriptions) > 0 ){
+		$subs_array = array();
+		foreach($subscriptions as $subs){
+			$subs_array[] = get_object_vars($subs);
+		}
+		$this->subscriptions = $subs_array;
+	} else {
+		$this->subscriptions = array();
+	}
       }
     } else {
       //TODO better handling of missing data here
@@ -82,7 +91,7 @@ echo $sql . "\n";
   }
 
   public function getSubscriptionStatus(){
-    return $this->subscriptions->_saved_data['status'];
+	  return $this->subscriptions;
   }
 }
 
