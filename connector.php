@@ -100,6 +100,7 @@ the reason it's so convoluted is due to php having trouble pulling out the membe
 						    $subs_array[] = get_object_vars($value);
 					    }
 					    if($key == "\0*\0payment_type"){
+						    echo "---------NAILED IT-------\n\n\n";
 						    $next_one_is_membership = true;
 					    }
 				    }
@@ -118,7 +119,11 @@ the reason it's so convoluted is due to php having trouble pulling out the membe
   }
 
   public function getSubscriptionStatus(){
-	  return $this->subscriptions;
+	  return $this->subscriptions[0]["\0*\0active"];
+  }
+
+  public function getSubscriptionStatus(){
+	  return $this->subscriptions[0]["\0*\0name"];
   }
 }
 
