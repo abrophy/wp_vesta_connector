@@ -4,6 +4,7 @@
 
 $db_data = parse_ini_file("db.ini");
 $vst_data = parse_ini_file("vst.ini");
+$whitelisted_users = parse_ini_file("user-whitelist.ini");
 
 $vst_hostname = $vst_data['vst_hostname'];
 $vst_username = $vst_data['vst_username'];
@@ -43,8 +44,10 @@ class Connector {
     if ($result->num_rows > 0) {
       // output data of each row
       while($row = $result->fetch_assoc()) {
-        echo 'CREATING USER INSTANCE: name: ' . $row['meta_value'] . "\n";
-	$this->users[] = new VestaUser($row);
+	      if(!in_array($row['meta_value'], $whitelisted_users)){
+		      echo 'CREATING USER INSTANCE: name: ' . $row['meta_value'] . "\n";
+		      $this->users[] = new VestaUser($row);
+	      }
       }
     } else {
       //TODO better handling of missing data here
