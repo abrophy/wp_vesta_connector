@@ -4,7 +4,7 @@
 
 $db_data = parse_ini_file("db.ini");
 $vst_data = parse_ini_file("vst.ini");
-$whitelisted_users = parse_ini_file("user-whitelist.ini");
+$whitelisted_users = parse_ini_file("user-whitelist.ini")["users"];
 
 $vst_hostname = $vst_data['vst_hostname'];
 $vst_username = $vst_data['vst_username'];
@@ -16,13 +16,15 @@ $db_password = $db_data['db_password'];
 
 //instantiate the Connector
 $api = new VestaApi($vst_hostname, $vst_username, $vst_password);
-$connector = new Connector($db_username, $db_password, $db_name );
+$connector = new Connector($db_username, $db_password, $db_name, $whitelisted_users );
 
 class Connector {
   public $users = [];
+public $whitelisted_users = [];
 
-  function __construct($db_username, $db_password, $db_name) {
+  function __construct($db_username, $db_password, $db_name, $whitelisted_users) {
 //Note currently configured to work with local DB's only
+	  $this->whitelisted_users = $whitelisted_users;
     $conn = new mysqli('localhost', $db_username, $db_password, $db_name );
     if ($conn->connect_error) {
           die('Connection failed: ' . $conn->connect_error);
@@ -44,7 +46,7 @@ class Connector {
     if ($result->num_rows > 0) {
       // output data of each row
       while($row = $result->fetch_assoc()) {
-	      if(!in_array($row['meta_value'], $whitelisted_users)){
+	      if(!in_array($row['meta_value'], $this->whitelisted_users)){
 		      echo 'CREATING USER INSTANCE: name: ' . $row['meta_value'] . "\n";
 		      $this->users[] = new VestaUser($row);
 	      }
