@@ -1,13 +1,5 @@
 <?php
 
-// HACKY UTILITY FUNCTION
-// needed to cast the unserialized wpmudev data to class with arrays so it can be accessed
-
-function castToClass($class, $object)
-{
-    return unserialize(preg_replace('/^O:\d+:"[^"]++"/', 'O:' . strlen($class) . ':"' . $class . '"', serialize($object)));
-}
-
 // pull in values from environment variables
 
 $db_data = parse_ini_file("db.ini");
@@ -81,7 +73,7 @@ echo $sql . "\n";
       // output data of each row
       while($row = $result->fetch_assoc()) {
         echo 'UPDATING SUBS DATA: name: ' . $this->userName . "\n";
-        $this->subscriptions = (castToClass('MembershipData',unserialize($row['meta_value'])));
+        $this->subscriptions = unserialize($row['meta_value']);
       }
     } else {
       //TODO better handling of missing data here
