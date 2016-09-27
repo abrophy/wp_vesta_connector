@@ -59,6 +59,7 @@ class Connector {
 
 class VestaUser {
   public $userId;
+  public $hasSubscriptions;
   public $subscriptions;
   public $userName;
 
@@ -82,8 +83,10 @@ echo $sql . "\n";
 		foreach($subscriptions as $subs){
 			$subs_array[] = get_object_vars($subs);
 		}
+		$this->hasSubscriptions = true;
 		$this->subscriptions = $subs_array;
 	} else {
+		$this->hasSubscriptions = false;
 		$this->subscriptions = array();
 	}
       }
