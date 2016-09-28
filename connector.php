@@ -122,7 +122,7 @@ the reason it's so convoluted is due to php having trouble pulling out the membe
 	  return $this->subscriptions[0]["\0*\0active"];
   }
 
-  public function getSubscriptionStatus(){
+  public function getSubscriptionName(){
 	  return $this->subscriptions[0]["\0*\0name"];
   }
 }
