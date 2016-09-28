@@ -71,59 +71,59 @@ class VestaUser {
   }
 
   public function updateSubscriptionData($conn){
-    $sql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "ms_subscriptions" AND user_id = ' . $this->userId ;
-echo "USER ID SQL STRING\n";
-echo $sql . "\n";
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-      // output data of each row
-	    while($row = $result->fetch_assoc()) {
-		    echo 'UPDATING SUBS DATA: name: ' . $this->userName . "\n";
-		    $subscriptions = unserialize($row['meta_value']);
+	  $sql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "ms_subscriptions" AND user_id = ' . $this->userId ;
+	  echo "USER ID SQL STRING\n";
+	  echo $sql . "\n";
+	  $result = $conn->query($sql);
+	  if ($result->num_rows > 0) {
+		  // output data of each row
+		  while($row = $result->fetch_assoc()) {
+			  echo 'UPDATING SUBS DATA: name: ' . $this->userName . "\n";
+			  $subscriptions = unserialize($row['meta_value']);
 
-		    /*These nested loops are required to pull the subs data out of a nested incomplete php object
+			  /*These nested loops are required to pull the subs data out of a nested incomplete php object
 
-the reason it's so convoluted is due to php having trouble pulling out the membership object as it's a nested incomplete, can't be called by key as though it's part of an array, or as though the parent is an object
-		     */
+			    the reason it's so convoluted is due to php having trouble pulling out the membership object as it's a nested incomplete, can't be called by key as though it's part of an array, or as though the parent is an object
+			   */
 
-		    if( count($subscriptions) > 0 ){
-			    var_dump($subscriptions);
-			    $subs_array = array();
-			    foreach($subscriptions as $subs){
-				    $subs_inner_array = get_object_vars($subs);
-				    var_dump($subs_inner_array);
+			  if( count($subscriptions) > 0 ){
+				  $subs_array = array();
+				  foreach($subscriptions as $subs){
+					  $subs_inner_array = get_object_vars($subs);
 
-				    $next_one_is_membership = false;
-				    foreach($subs_inner_array as $key => $value){
-					    if($next_one_is_membership){
-						    $next_one_is_membership = false;
-						    $subs_array[] = get_object_vars($value);
-					    }
-					    if($key == "\0*\0payment_type"){
-						    echo "---------NAILED IT-------\n\n\n";
-						    $next_one_is_membership = true;
-					    }
-				    }
-			    }
-			    $this->hasSubscriptions = true;
-			    $this->subscriptions = $subs_array;
-		    } else {
-			    $this->hasSubscriptions = false;
-			    $this->subscriptions = array();
-		    }
-	    }
-    } else {
-      //TODO better handling of missing data here
-      echo "0 results\n";
-    }
+					  $next_one_is_membership = false;
+					  foreach($subs_inner_array as $key => $value){
+						  if($next_one_is_membership){
+							  $next_one_is_membership = false;
+							  $subs_array['membership'] = get_object_vars($value);
+						  }
+						  if($key == "\0*\0payment_type"){
+							  $subs_array[$key] = $value;
+							  $next_one_is_membership = true;
+						  } else {
+							  $subs_array[$key] = $value;
+						  }
+					  }
+				  }
+				  $this->hasSubscriptions = true;
+				  $this->subscriptions = $subs_array;
+			  } else {
+				  $this->hasSubscriptions = false;
+				  $this->subscriptions = array();
+			  }
+		  }
+	  } else {
+		  //TODO better handling of missing data here
+		  echo "0 results\n";
+	  }
   }
 
   public function getSubscriptionStatus(){
-	  return $this->subscriptions[0]["\0*\0active"];
+	  return $this->subscriptions["\0*\0status"];
   }
 
   public function getSubscriptionName(){
-	  return $this->subscriptions[0]["\0*\0name"];
+	  return $this->subscriptions["membership"]["\0*\0name"];
   }
 }
 
