@@ -66,11 +66,6 @@ public $whitelisted_users = [];
 
 class VestaUser {
 
-/*TODO
-currently the vesta username and wp username aren't guaranteed to be the same
-need a way to synchronize these, or at least link two such values
-*/
-
   public $userId;
   public $hasSubscriptions;
   public $subscriptions;
@@ -134,21 +129,22 @@ need a way to synchronize these, or at least link two such values
 	  return $this->subscriptions["membership"]["\0*\0name"];
   }
 
-  private function getVestaStatus($api, $userName){
-	  return $api->listUser($userName)[$userName]["SUSPENDED"];
+  private function getVestaStatus($api){
+	  return $api->listUser($this->userName)[$this->userName]["SUSPENDED"];
   }
 
-  public function compareVestaStatus($api, $userName){
-	  $vestaStatus = $this->getVestaStatus($api, $userName);
+  public function compareVestaStatus($api){
+	  $vestaStatus = $this->getVestaStatus($api);
 	  $wpStatus = $this->getSubscriptionStatus();
 
-if($vestaStatus == "yes" && $wpStatus == "active"){
-//TODO create appropriate functions to handle suspension and unsuspension of accounts below
-echo "User $this->userName needs to be unsuspended";
-}
-if($vestaStatus == "no" && ($wpStatus == "cancelled" || $wpStatus == "expired")){
-echo "User $this->userName needs to be suspended";
-}
+	  if($vestaStatus == "yes" && $wpStatus == "active"){
+		  //TODO create appropriate functions to handle suspension and unsuspension of accounts below
+		  echo "User $this->userName needs to be unsuspended\n";
+	  } elseif ($vestaStatus == "no" && ($wpStatus == "cancelled" || $wpStatus == "expired")) {
+		  echo "User $this->userName needs to be suspended\n";
+	  } else {
+echo "User status appropriately synched between vesta and wp for $this->userName\n";
+	  }
   }
 }
 
@@ -234,7 +230,7 @@ class VestaApi {
 	  // Check result
 	  $decodedJson = json_decode($answer, true);
 	  if ($decodedJson == null){
-		  echo "User does not exist";
+		  echo "User does not exist: $username \n";
 	  } else {
 		  return $decodedJson;
 	  }
