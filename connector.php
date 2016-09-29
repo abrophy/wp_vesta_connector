@@ -6,8 +6,6 @@ $db_data = parse_ini_file("db.ini");
 $vst_data = parse_ini_file("vst.ini");
 $whitelisted_users = parse_ini_file("user-whitelist.ini")["users"];
 
-var_dump($vst_data);
-
 $vst_hostname = $vst_data['vst_hostname'];
 $vst_username = $vst_data['vst_username'];
 $vst_password = $vst_data['vst_password'];
@@ -85,13 +83,10 @@ need a way to synchronize these, or at least link two such values
 
   public function updateSubscriptionData($conn){
 	  $sql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "ms_subscriptions" AND user_id = ' . $this->userId ;
-	  echo "USER ID SQL STRING\n";
-	  echo $sql . "\n";
 	  $result = $conn->query($sql);
 	  if ($result->num_rows > 0) {
 		  // output data of each row
 		  while($row = $result->fetch_assoc()) {
-			  echo 'UPDATING SUBS DATA: name: ' . $this->userName . "\n";
 			  $subscriptions = unserialize($row['meta_value']);
 
 			  /*These nested loops are required to pull the subs data out of a nested incomplete php object
