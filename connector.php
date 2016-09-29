@@ -6,6 +6,8 @@ $db_data = parse_ini_file("db.ini");
 $vst_data = parse_ini_file("vst.ini");
 $whitelisted_users = parse_ini_file("user-whitelist.ini")["users"];
 
+var_dump($vst_data);
+
 $vst_hostname = $vst_data['vst_hostname'];
 $vst_username = $vst_data['vst_username'];
 $vst_password = $vst_data['vst_password'];
@@ -55,6 +57,11 @@ public $whitelisted_users = [];
       //TODO better handling of missing data here
       echo "0 results\n";
     }
+  }
+
+  function synchUserStatuses(){
+	  foreach($this->users as $user){
+	  }
   }
 
 }
@@ -125,6 +132,10 @@ class VestaUser {
   public function getSubscriptionName(){
 	  return $this->subscriptions["membership"]["\0*\0name"];
   }
+
+  public function compareVestaStatus(){
+	  //$api->listUser('temp');
+  }
 }
 
 
@@ -141,7 +152,6 @@ class VestaApi {
     $this->vst_hostname = $hostname;
     $this->vst_username = $username;
     $this->vst_password = $password;
-    $this->vst_returncode = 'yes';
   }
 
   public function createNewUser($username, $password, $email, $package, $first_name){
@@ -150,7 +160,7 @@ class VestaApi {
     $postvars = array(
       'user' => $vst_username,
       'password' => $vst_password,
-      'returncode' => $vst_returncode,
+      'returncode' => 'yes',
       'cmd' => 'v-add-user',
       'arg1' => $username,
       'arg2' => $password,
@@ -181,4 +191,38 @@ class VestaApi {
       return false;
     }
   }
+
+
+  public function listUser($username){
+
+	  // Prepare POST query
+	  $postvars = array(
+			  'user' => $this->vst_username,
+			  'password' => $this->vst_password,
+			  'returncode' => 'no',
+			  'cmd' => 'v-list-user',
+			  'arg1' => $username,
+			  'arg2' => 'json',
+			  );
+	  $postdata = http_build_query($postvars);
+
+	  // Send POST query via cURL
+	  $postdata = http_build_query($postvars);
+	  $curl = curl_init();
+	  curl_setopt($curl, CURLOPT_URL, 'https://' . $this->vst_hostname . ':8083/api/');
+	  curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+	  curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+	  curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+	  curl_setopt($curl, CURLOPT_POST, true);
+	  curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
+	  $answer = curl_exec($curl);
+
+	  // Check result
+	  echo $answer;
+if ($answer == "3"){
+	echo "User not found";
+}
+	  var_dump($answer);
+  }
+
 }
