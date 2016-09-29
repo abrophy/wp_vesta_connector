@@ -51,7 +51,7 @@ class Connector {
       while($row = $result->fetch_assoc()) {
 	      if(!in_array($row['meta_value'], $this->whitelisted_users)){
 		      echo 'CREATING USER INSTANCE: name: ' . $row['meta_value'] . "\n";
-		      $this->users[] = new VestaUser($row);
+		      $this->users[] = new VestaUser($row, $this->api);
 	      }
       }
     } else {
@@ -62,11 +62,11 @@ class Connector {
 
   function synchUserStatuses(){
 	  foreach($this->users as $user){
-		  if($user->existsOnVesta($this->api)){
-			  //TODO proceed with comparison
+		  if($user->existsOnVesta()){
+			  $user->compareVestaStatus();
 		  } else {
 			  //TODO Create new user with appropriate details here
-			  echo "user $user->userName needs to be created";
+			  echo "user $user->userName needs to be created\n";
 		  }
 	  }
   }
@@ -79,10 +79,12 @@ class VestaUser {
   public $hasSubscriptions;
   public $subscriptions;
   public $userName;
+  public $api;
 
-  function __construct($row){
+  function __construct($row, $api){
     $this->userId = $row['user_id'];
     $this->userName = $row['meta_value'];
+    $this->api = $api;
   }
 
   public function updateSubscriptionData($conn){
@@ -157,9 +159,9 @@ echo "User status appropriately synched between vesta and wp for $this->userName
   }
 
 
-  public function existsOnVesta($api){
+  public function existsOnVesta(){
 	  //returns null if the user doesn't exist on the vesta system
-	  return $api->fetchVestaData($this->userName);
+	  return $this->api->fetchVestaData($this->userName);
   }
 
 
@@ -246,7 +248,8 @@ class VestaApi {
 		// Check result
 		$decodedJson = json_decode($answer, true);
 		if ($decodedJson == null){
-			echo "User does not exist: $username \n";
+			//user does not exist
+			return false;
 		} else {
 			return $decodedJson;
 		}
