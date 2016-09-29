@@ -67,6 +67,12 @@ public $whitelisted_users = [];
 }
 
 class VestaUser {
+
+/*TODO
+currently the vesta username and wp username aren't guaranteed to be the same
+need a way to synchronize these, or at least link two such values
+*/
+
   public $userId;
   public $hasSubscriptions;
   public $subscriptions;
@@ -133,8 +139,21 @@ class VestaUser {
 	  return $this->subscriptions["membership"]["\0*\0name"];
   }
 
-  public function compareVestaStatus(){
-	  //$api->listUser('temp');
+  private function getVestaStatus($api, $userName){
+	  return $api->listUser($userName)[$userName]["SUSPENDED"];
+  }
+
+  public function compareVestaStatus($api, $userName){
+	  $vestaStatus = $this->getVestaStatus($api, $userName);
+	  $wpStatus = $this->getSubscriptionStatus();
+
+if($vestaStatus == "yes" && $wpStatus == "active"){
+//TODO create appropriate functions to handle suspension and unsuspension of accounts below
+echo "User $this->userName needs to be unsuspended";
+}
+if($vestaStatus == "no" && ($wpStatus == "cancelled" || $wpStatus == "expired")){
+echo "User $this->userName needs to be suspended";
+}
   }
 }
 
@@ -218,11 +237,12 @@ class VestaApi {
 	  $answer = curl_exec($curl);
 
 	  // Check result
-	  echo $answer;
-if ($answer == "3"){
-	echo "User not found";
-}
-	  var_dump($answer);
+	  $decodedJson = json_decode($answer, true);
+	  if ($decodedJson == null){
+		  echo "User does not exist";
+	  } else {
+		  return $decodedJson;
+	  }
   }
 
 }
