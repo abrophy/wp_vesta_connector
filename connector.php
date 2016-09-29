@@ -65,7 +65,6 @@ class Connector {
 		  if($user->existsOnVesta()){
 			  $user->compareVestaStatus();
 		  } else {
-			  //TODO Create new user with appropriate details here
 			  echo "user $user->userName needs to be created\n";
 		  }
 	  }
@@ -188,7 +187,7 @@ class VestaApi {
 		$this->vst_password = $password;
 	}
 
-	public function createOnVesta($username, $password, $email, $package, $first_name){
+	public function createNewUser($username, $password, $email, $package, $first_name){
 
 		// Prepare POST query
 		$postvars = array(
@@ -259,4 +258,5 @@ class VestaApi {
 			return $decodedJson;
 		}
 	}
+
 }
