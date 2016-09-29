@@ -79,6 +79,11 @@ class VestaUser {
   public $hasSubscriptions;
   public $subscriptions;
   public $userName;
+
+/*TODO:
+ move the api back out of the class,
+as there being so many copies of the user class with so many copies of the api within them would be inefficient, rather just pass the api in as a parameter when calling the methods that need the api
+*/
   public $api;
 
   function __construct($row, $api){
