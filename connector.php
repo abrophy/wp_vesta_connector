@@ -17,15 +17,17 @@ $db_password = $db_data['db_password'];
 
 //instantiate the Connector
 $api = new VestaApi($vst_hostname, $vst_username, $vst_password);
-$connector = new Connector($db_username, $db_password, $db_name, $whitelisted_users );
+$connector = new Connector($db_username, $db_password, $db_name, $whitelisted_users, $api );
 
 class Connector {
   public $users = [];
   public $whitelisted_users = [];
+  public $api;
 
-  function __construct($db_username, $db_password, $db_name, $whitelisted_users) {
+  function __construct($db_username, $db_password, $db_name, $whitelisted_users, $api) {
 //Note currently configured to work with local DB's only
 	  $this->whitelisted_users = $whitelisted_users;
+	  $this->api = $api;
     $conn = new mysqli('localhost', $db_username, $db_password, $db_name );
     if ($conn->connect_error) {
           die('Connection failed: ' . $conn->connect_error);
@@ -60,11 +62,11 @@ class Connector {
 
   function synchUserStatuses(){
 	  foreach($this->users as $user){
-		  if($user->existsOnVesta()){
+		  if($user->existsOnVesta($this->api)){
 			  //TODO proceed with comparison
 		  } else {
 			  //TODO Create new user with appropriate details here
-			  echo "user $this->userName needs tobe created";
+			  echo "user $this->userName needs to be created";
 		  }
 	  }
   }
@@ -136,12 +138,12 @@ class VestaUser {
 	  return $this->subscriptions["membership"]["\0*\0name"];
   }
 
-  private function getVestaStatus($api){
-	  return $api->fetchVestaData($this->userName)[$this->userName]["SUSPENDED"];
+  private function getVestaStatus(){
+	  return $this->api->fetchVestaData($this->userName)[$this->userName]["SUSPENDED"];
   }
 
-  public function compareVestaStatus($api){
-	  $vestaStatus = $this->getVestaStatus($api);
+  public function compareVestaStatus(){
+	  $vestaStatus = $this->getVestaStatus();
 	  $wpStatus = $this->getSubscriptionStatus();
 
 	  if($vestaStatus == "yes" && $wpStatus == "active"){
@@ -153,97 +155,100 @@ class VestaUser {
 echo "User status appropriately synched between vesta and wp for $this->userName\n";
 	  }
   }
+
+
+  public function existsOnVesta($api){
+	  //returns null if the user doesn't exist on the vesta system
+	  return $api->fetchVestaData($this->userName);
+  }
+
+
 }
 
 
 
 class VestaApi {
 
-  // Server credentials
-  private $vst_hostname;
-  private $vst_username;
-  private $vst_password;
-  private $vst_returncode;
+	// Server credentials
+	private $vst_hostname;
+	private $vst_username;
+	private $vst_password;
+	private $vst_returncode;
 
-  function __construct($hostname, $username, $password){
-    $this->vst_hostname = $hostname;
-    $this->vst_username = $username;
-    $this->vst_password = $password;
-  }
+	function __construct($hostname, $username, $password){
+		$this->vst_hostname = $hostname;
+		$this->vst_username = $username;
+		$this->vst_password = $password;
+	}
 
-  public function createOnVesta($username, $password, $email, $package, $first_name){
+	public function createOnVesta($username, $password, $email, $package, $first_name){
 
-    // Prepare POST query
-    $postvars = array(
-      'user' => $vst_username,
-      'password' => $vst_password,
-      'returncode' => 'yes',
-      'cmd' => 'v-add-user',
-      'arg1' => $username,
-      'arg2' => $password,
-      'arg3' => $email,
-      'arg4' => $package,
-      'arg5' => $first_name,
-      'arg6' => $last_name
-    );
-    $postdata = http_build_query($postvars);
+		// Prepare POST query
+		$postvars = array(
+				'user' => $vst_username,
+				'password' => $vst_password,
+				'returncode' => 'yes',
+				'cmd' => 'v-add-user',
+				'arg1' => $username,
+				'arg2' => $password,
+				'arg3' => $email,
+				'arg4' => $package,
+				'arg5' => $first_name,
+				'arg6' => $last_name
+				);
+		$postdata = http_build_query($postvars);
 
-    // Send POST query via cURL
-    $postdata = http_build_query($postvars);
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, 'https://' . $vst_hostname . ':8083/api/');
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-    curl_setopt($curl, CURLOPT_POST, true);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
-    $answer = curl_exec($curl);
+		// Send POST query via cURL
+		$postdata = http_build_query($postvars);
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, 'https://' . $vst_hostname . ':8083/api/');
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($curl, CURLOPT_POST, true);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
+		$answer = curl_exec($curl);
 
-    // Check result
-    if($answer == 0) {
-      echo "User account has been successfuly created\n";
-      return true;
-    } else {
-      echo "Query returned error code: " .$answer. "\n";
-      return false;
-    }
-  }
+		// Check result
+		if($answer == 0) {
+			echo "User account has been successfuly created\n";
+			return true;
+		} else {
+			echo "Query returned error code: " .$answer. "\n";
+			return false;
+		}
+	}
 
-  public function fetchVestaData($username){
+	public function fetchVestaData($username){
 
-	  // Prepare POST query
-	  $postvars = array(
-			  'user' => $this->vst_username,
-			  'password' => $this->vst_password,
-			  'returncode' => 'no',
-			  'cmd' => 'v-list-user',
-			  'arg1' => $username,
-			  'arg2' => 'json',
-			  );
-	  $postdata = http_build_query($postvars);
+		// Prepare POST query
+		$postvars = array(
+				'user' => $this->vst_username,
+				'password' => $this->vst_password,
+				'returncode' => 'no',
+				'cmd' => 'v-list-user',
+				'arg1' => $username,
+				'arg2' => 'json',
+				);
+		$postdata = http_build_query($postvars);
 
-	  // Send POST query via cURL
-	  $postdata = http_build_query($postvars);
-	  $curl = curl_init();
-	  curl_setopt($curl, CURLOPT_URL, 'https://' . $this->vst_hostname . ':8083/api/');
-	  curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
-	  curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-	  curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-	  curl_setopt($curl, CURLOPT_POST, true);
-	  curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
-	  $answer = curl_exec($curl);
+		// Send POST query via cURL
+		$postdata = http_build_query($postvars);
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, 'https://' . $this->vst_hostname . ':8083/api/');
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($curl, CURLOPT_POST, true);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
+		$answer = curl_exec($curl);
 
-	  // Check result
-	  $decodedJson = json_decode($answer, true);
-	  if ($decodedJson == null){
-		  echo "User does not exist: $username \n";
-	  } else {
-		  return $decodedJson;
-	  }
-  }
-
-  public function existsOnVesta($api){
-	  //returns null if the user doesn't exist on the vesta system
-	  return $api->fetchVestaData($this->userName);
-  }
+		// Check result
+		$decodedJson = json_decode($answer, true);
+		if ($decodedJson == null){
+			echo "User does not exist: $username \n";
+		} else {
+			return $decodedJson;
+		}
+	}
 }
