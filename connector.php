@@ -66,7 +66,7 @@ class Connector {
 			  //TODO proceed with comparison
 		  } else {
 			  //TODO Create new user with appropriate details here
-			  echo "user $this->userName needs to be created";
+			  echo "user $user->userName needs to be created";
 		  }
 	  }
   }
