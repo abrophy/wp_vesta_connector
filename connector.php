@@ -2,6 +2,7 @@
 
 // pull in values from environment variables
 
+//TODO refactor these into arrays so as to make it easier to pass them into constructors
 $db_data = parse_ini_file("db.ini");
 $vst_data = parse_ini_file("vst.ini");
 $whitelisted_users = parse_ini_file("user-whitelist.ini")["users"];
@@ -20,7 +21,7 @@ $connector = new Connector($db_username, $db_password, $db_name, $whitelisted_us
 
 class Connector {
   public $users = [];
-public $whitelisted_users = [];
+  public $whitelisted_users = [];
 
   function __construct($db_username, $db_password, $db_name, $whitelisted_users) {
 //Note currently configured to work with local DB's only
@@ -59,6 +60,12 @@ public $whitelisted_users = [];
 
   function synchUserStatuses(){
 	  foreach($this->users as $user){
+		  if($user->existsOnVesta()){
+			  //TODO proceed with comparison
+		  } else {
+			  //TODO Create new user with appropriate details here
+			  echo "user $this->userName needs tobe created";
+		  }
 	  }
   }
 
@@ -130,7 +137,7 @@ class VestaUser {
   }
 
   private function getVestaStatus($api){
-	  return $api->listUser($this->userName)[$this->userName]["SUSPENDED"];
+	  return $api->fetchVestaData($this->userName)[$this->userName]["SUSPENDED"];
   }
 
   public function compareVestaStatus($api){
@@ -164,7 +171,7 @@ class VestaApi {
     $this->vst_password = $password;
   }
 
-  public function createNewUser($username, $password, $email, $package, $first_name){
+  public function createOnVesta($username, $password, $email, $package, $first_name){
 
     // Prepare POST query
     $postvars = array(
@@ -202,8 +209,7 @@ class VestaApi {
     }
   }
 
-
-  public function listUser($username){
+  public function fetchVestaData($username){
 
 	  // Prepare POST query
 	  $postvars = array(
@@ -236,4 +242,8 @@ class VestaApi {
 	  }
   }
 
+  public function existsOnVesta($api){
+	  //returns null if the user doesn't exist on the vesta system
+	  return $api->fetchVestaData($this->userName);
+  }
 }
