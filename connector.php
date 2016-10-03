@@ -19,6 +19,12 @@ $db_password = $db_data['db_password'];
 $api = new VestaApi($vst_hostname, $vst_username, $vst_password);
 $connector = new Connector($db_username, $db_password, $db_name, $whitelisted_users, $api );
 
+/*
+ * SYNCHRONIZE!
+ * below line synchs all wp and vesta user statuses
+ */
+$connector->synchUserStatuses();
+
 class Connector {
   public $users = [];
   public $whitelisted_users = [];
