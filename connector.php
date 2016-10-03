@@ -146,7 +146,9 @@ as there being so many copies of the user class with so many copies of the api w
   }
 
   public function getSubscriptionName(){
-	  return $this->subscriptions["membership"]["\0*\0name"];
+	  $subsArray = parse_ini_file("packages.ini");
+	  $subsName = $this->subscriptions["membership"]["\0*\0name"];
+	  return $subsArray[$subsName];
   }
 
   private function getVestaStatus(){
@@ -227,7 +229,7 @@ as there being so many copies of the user class with so many copies of the api w
 		  $password =  $this->generateRandomPassword();
 		  $email = $this->email;
 		  $package = $this->getSubscriptionName();
-		  $fullName = $this->fullName
+		  $fullName = $this->fullName;
 
 		  $this->api->createNewUser($username, $password, $email, $package, $fullName);
 	  }
