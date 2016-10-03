@@ -198,7 +198,7 @@ as there being so many copies of the user class with so many copies of the api w
 	  public function createOnVesta(){
 		  $username = $this->userName;
 		  $password =  $this->generateRandomPassword();
-		  //$email = get from WP
+		  $email = $this->email;
 		  //$package = get from WP -- subscription name method
 		  //$first_name = get from WP usermeta -- ms_name
 
