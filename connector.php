@@ -80,7 +80,8 @@ class VestaUser {
   public $subscriptions;
   public $userName;
   public $email;
-  public $fullName;
+  public $firstName;
+  public $lastName;
 
 /*TODO:
  move the api back out of the class,
@@ -93,7 +94,8 @@ as there being so many copies of the user class with so many copies of the api w
     $this->userName = $row['meta_value'];
     $this->api = $api;
     $this->email = $this->getEmailAddress($conn);
-    $this->fullName = $this->getFullName($conn);
+    $this->firstName = $this->getFirstName($conn);
+    $this->lastName = $this->getLastName($conn);
   }
 
   public function updateSubscriptionData($conn){
@@ -166,14 +168,11 @@ as there being so many copies of the user class with so many copies of the api w
 	  return implode($pass);
   }
 
-  private function getFullName($conn){
+  private function getFirstName($conn){
 	  $firstSql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "first_name" AND user_id = ' . $this->userId ;
-	  $secondSql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "last_name" AND user_id = ' . $this->userId ;
 	  $firstResult = $conn->query($firstSql);
-	  $secondResult = $conn->query($secondSql);
 
 	  $firstName = "";
-	  $lastName = "";
 	  if ($firstResult->num_rows > 0) {
 		  // output data of each row
 		  while($row = $firstResult->fetch_assoc()) {
@@ -181,14 +180,21 @@ as there being so many copies of the user class with so many copies of the api w
 		  }
 	  }
 
+	  return $firstName;
+  }
+
+  private function getLastName($conn){
+	  $secondSql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "last_name" AND user_id = ' . $this->userId ;
+	  $secondResult = $conn->query($secondSql);
+
+	  $lastName = "";
 	  if ($secondResult->num_rows > 0) {
 		  // output data of each row
 		  while($row = $secondResult->fetch_assoc()) {
 			  $lastName = $row["meta_value"];
 		  }
 	  }
-
-	  return $firstName . " " . $lastName;
+	  return $lastName;
   }
 
   private function getEmailAddress($conn){
@@ -229,9 +235,10 @@ as there being so many copies of the user class with so many copies of the api w
 		  $password =  $this->generateRandomPassword();
 		  $email = $this->email;
 		  $package = $this->getSubscriptionName();
-		  $fullName = $this->fullName;
+		  $firstName= $this->firstName;
+		  $lastName= $this->lastName;
 
-		  $this->api->createNewUser($username, $password, $email, $package, $fullName);
+		  $this->api->createNewUser($username, $password, $email, $package, $firstName, $lastName);
 	  }
   }
 
@@ -251,7 +258,7 @@ class VestaApi {
 		$this->vst_password = $password;
 	}
 
-	public function createNewUser($username, $password, $email, $package, $fullName){
+	public function createNewUser($username, $password, $email, $package, $first_name, $last_name){
 
 		// Prepare POST query
 		$postvars = array(
@@ -263,10 +270,8 @@ class VestaApi {
 				'arg2' => $password,
 				'arg3' => $email,
 				'arg4' => $package,
-//TODO need to get correct last name
-				'arg5' => $fullName,
-//				'arg6' => $last_name
-				'arg6' => "testing last name"
+				'arg5' => $first_name,
+				'arg6' => $last_name
 				);
 		$postdata = http_build_query($postvars);
 
