@@ -251,27 +251,29 @@ class VestaApi {
 		$this->vst_password = $password;
 	}
 
-	public function createNewUser($username, $password, $email, $package, $first_name){
+	public function createNewUser($username, $password, $email, $package, $fullName){
 
 		// Prepare POST query
 		$postvars = array(
-				'user' => $vst_username,
-				'password' => $vst_password,
+				'user' => $this->vst_username,
+				'password' => $this->vst_password,
 				'returncode' => 'yes',
 				'cmd' => 'v-add-user',
 				'arg1' => $username,
 				'arg2' => $password,
 				'arg3' => $email,
 				'arg4' => $package,
-				'arg5' => $first_name,
-				'arg6' => $last_name
+//TODO need to get correct last name
+				'arg5' => $fullName,
+//				'arg6' => $last_name
+				'arg6' => "testing last name"
 				);
 		$postdata = http_build_query($postvars);
 
 		// Send POST query via cURL
 		$postdata = http_build_query($postvars);
 		$curl = curl_init();
-		curl_setopt($curl, CURLOPT_URL, 'https://' . $vst_hostname . ':8083/api/');
+		curl_setopt($curl, CURLOPT_URL, 'https://' . $this->vst_hostname . ':8083/api/');
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
 		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
@@ -280,9 +282,12 @@ class VestaApi {
 		$answer = curl_exec($curl);
 
 		// Check result
+//TODO the below test is not working to determine if the user was created successfully
+		echo "RETURNING ANSWER: $answer";
 		if($answer == 0) {
 			echo "User account has been successfuly created\n";
 			//TODO send out a notification e-mail to the relevant address(es)
+			echo "USER $username SUCCESSFULLY CREATED\n";
 			return true;
 		} else {
 			echo "Query returned error code: " .$answer. "\n";
