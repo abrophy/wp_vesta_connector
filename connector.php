@@ -80,6 +80,7 @@ class VestaUser {
   public $subscriptions;
   public $userName;
   public $email;
+  public $fullName;
 
 /*TODO:
  move the api back out of the class,
@@ -92,6 +93,7 @@ as there being so many copies of the user class with so many copies of the api w
     $this->userName = $row['meta_value'];
     $this->api = $api;
     $this->email = $this->getEmailAddress($conn);
+    $this->fullName = $this->getFullName($conn);
   }
 
   public function updateSubscriptionData($conn){
@@ -162,6 +164,31 @@ as there being so many copies of the user class with so many copies of the api w
 	  return implode($pass);
   }
 
+  private function getFullName($conn){
+	  $firstSql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "first_name" AND user_id = ' . $this->userId ;
+	  $secondSql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "last_name" AND user_id = ' . $this->userId ;
+	  $firstResult = $conn->query($firstSql);
+	  $secondResult = $conn->query($secondSql);
+
+	  $firstName = "";
+	  $lastName = "";
+	  if ($firstResult->num_rows > 0) {
+		  // output data of each row
+		  while($row = $firstResult->fetch_assoc()) {
+			  $firstName = $row["meta_value"];
+		  }
+	  }
+
+	  if ($secondResult->num_rows > 0) {
+		  // output data of each row
+		  while($row = $secondResult->fetch_assoc()) {
+			  $lastName = $row["meta_value"];
+		  }
+	  }
+
+	  return $firstName . " " . $lastName;
+  }
+
   private function getEmailAddress($conn){
 	  $sql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "ms_email" AND user_id = ' . $this->userId ;
 	  $result = $conn->query($sql);
@@ -200,12 +227,10 @@ as there being so many copies of the user class with so many copies of the api w
 		  $password =  $this->generateRandomPassword();
 		  $email = $this->email;
 		  $package = $this->getSubscriptionName();
-		  //$first_name = get from WP usermeta -- ms_name
+		  $fullName = $this->fullName
 
-		  $this->api->createNewUser($username, $password, $email, $package, $first_name);
+		  $this->api->createNewUser($username, $password, $email, $package, $fullName);
 	  }
-
-
   }
 
 
