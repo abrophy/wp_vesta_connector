@@ -51,7 +51,7 @@ class Connector {
       while($row = $result->fetch_assoc()) {
 	      if(!in_array($row['meta_value'], $this->whitelisted_users)){
 		      echo 'CREATING USER INSTANCE: name: ' . $row['meta_value'] . "\n";
-		      $this->users[] = new VestaUser($row, $this->api);
+		      $this->users[] = new VestaUser($row, $this->api, $conn);
 	      }
       }
     } else {
@@ -79,6 +79,7 @@ class VestaUser {
   public $hasSubscriptions;
   public $subscriptions;
   public $userName;
+  public $email;
 
 /*TODO:
  move the api back out of the class,
@@ -86,10 +87,11 @@ as there being so many copies of the user class with so many copies of the api w
 */
   public $api;
 
-  function __construct($row, $api){
+  function __construct($row, $api, $conn){
     $this->userId = $row['user_id'];
     $this->userName = $row['meta_value'];
     $this->api = $api;
+    $this->email = $this->getEmailAddress($conn);
   }
 
   public function updateSubscriptionData($conn){
@@ -160,38 +162,51 @@ as there being so many copies of the user class with so many copies of the api w
 	  return implode($pass);
   }
 
-  public function compareVestaStatus(){
-	  $vestaStatus = $this->getVestaStatus();
-	  $wpStatus = $this->getSubscriptionStatus();
-
-	  if($vestaStatus == "yes" && $wpStatus == "active"){
-		  //TODO create appropriate functions to handle suspension and unsuspension of accounts below
-		  echo "User $this->userName needs to be unsuspended\n";
-	  } elseif ($vestaStatus == "no" && ($wpStatus == "cancelled" || $wpStatus == "expired")) {
-		  echo "User $this->userName needs to be suspended\n";
+  private function getEmailAddress($conn){
+	  $sql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "ms_email" AND user_id = ' . $this->userId ;
+	  $result = $conn->query($sql);
+	  if ($result->num_rows > 0) {
+		  // output data of each row
+		  while($row = $result->fetch_assoc()) {
+			  return $row["meta_value"];
+		  }
 	  } else {
-		  echo "User status appropriately synched between vesta and wp for $this->userName\n";
+		  return false;
 	  }
   }
 
+	  public function compareVestaStatus(){
+		  $vestaStatus = $this->getVestaStatus();
+		  $wpStatus = $this->getSubscriptionStatus();
 
-  public function existsOnVesta(){
-	  //returns null if the user doesn't exist on the vesta system
-	  return $this->api->fetchVestaData($this->userName);
+		  if($vestaStatus == "yes" && $wpStatus == "active"){
+			  //TODO create appropriate functions to handle suspension and unsuspension of accounts below
+			  echo "User $this->userName needs to be unsuspended\n";
+		  } elseif ($vestaStatus == "no" && ($wpStatus == "cancelled" || $wpStatus == "expired")) {
+			  echo "User $this->userName needs to be suspended\n";
+		  } else {
+			  echo "User status appropriately synched between vesta and wp for $this->userName\n";
+		  }
+	  }
+
+
+	  public function existsOnVesta(){
+		  //returns null if the user doesn't exist on the vesta system
+		  return $this->api->fetchVestaData($this->userName);
+	  }
+
+	  public function createOnVesta(){
+		  $username = $this->userName;
+		  $password =  $this->generateRandomPassword();
+		  //$email = get from WP
+		  //$package = get from WP -- subscription name method
+		  //$first_name = get from WP usermeta -- ms_name
+
+		  $this->api->createNewUser($username, $password, $email, $package, $first_name);
+	  }
+
+
   }
-
-  public function createOnVesta(){
-	  $username = $this->userName;
-	  $password =  $this->generateRandomPassword();
-	  //$email = get from WP
-	  //$package = get from WP -- subscription name method
-	  //$first_name = get from WP usermeta -- ms_name
-
-	  $this->api->createNewUser($username, $password, $email, $package, $first_name);
-  }
-
-
-}
 
 
 
