@@ -215,11 +215,13 @@ as there being so many copies of the user class with so many copies of the api w
 		  $wpStatus = $this->getSubscriptionStatus();
 
 		  if($vestaStatus == "yes" && $wpStatus == "active"){
-			  //TODO create appropriate functions to handle suspension and unsuspension of accounts below
+//TODO create convenience functions in the user class that automatically calls this method with the username
 			  echo "User $this->userName needs to be unsuspended\n";
+$this->api->unsuspendOnVesta($this->userName);
 			  //TODO make sure that user is also suspended if there are absolutely no subscriptions active for their account
 		  } elseif ($vestaStatus == "no" && ($wpStatus == "cancelled" || $wpStatus == "expired")) {
 			  echo "User $this->userName needs to be suspended\n";
+			  $this->api->suspendOnVesta($this->userName);
 		  } else {
 			  echo "User status appropriately synched between vesta and wp for $this->userName\n";
 		  }
@@ -336,6 +338,59 @@ class VestaApi {
 	}
 
 //TODO create method for suspending user
+	public function suspendOnVesta($username){
+
+		// Prepare POST query
+		$postvars = array(
+				'user' => $this->vst_username,
+				'password' => $this->vst_password,
+				'returncode' => 'no',
+				'cmd' => 'v-suspend-user',
+				'arg1' => $username,
+				);
+		$postdata = http_build_query($postvars);
+
+		// Send POST query via cURL
+		$postdata = http_build_query($postvars);
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, 'https://' . $this->vst_hostname . ':8083/api/');
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($curl, CURLOPT_POST, true);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
+		$answer = curl_exec($curl);
+
+		// Check result
+		echo "$username USER SUSPENDED: $answer\n"; 
+	}
+
+	public function unsuspendOnVesta($username){
+
+		// Prepare POST query
+		$postvars = array(
+				'user' => $this->vst_username,
+				'password' => $this->vst_password,
+				'returncode' => 'no',
+				'cmd' => 'v-unsuspend-user',
+				'arg1' => $username,
+				);
+		$postdata = http_build_query($postvars);
+
+		// Send POST query via cURL
+		$postdata = http_build_query($postvars);
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, 'https://' . $this->vst_hostname . ':8083/api/');
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($curl, CURLOPT_POST, true);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
+		$answer = curl_exec($curl);
+
+		// Check result
+		echo "$username USER UNSUSPENDED: $answer\n"; 
+	}
 
 //TODO create method for unsuspending user
 }
