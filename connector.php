@@ -66,6 +66,7 @@ class Connector {
 			  $user->compareVestaStatus();
 		  } else {
 			  echo "user $user->userName needs to be created\n";
+			  $user->createOnVesta();
 		  }
 	  }
   }
@@ -148,6 +149,17 @@ as there being so many copies of the user class with so many copies of the api w
 	  return $this->api->fetchVestaData($this->userName)[$this->userName]["SUSPENDED"];
   }
 
+  private function generateRandomPassword(){
+	  $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+	  $pass = array();
+	  $alphaLength = strlen($alphabet) - 1;
+	  for ($i = 0; $i < 8; $i++) {
+		  $n = rand(0, $alphaLength);
+		  $pass[] = $alphabet[$n];
+	  }
+	  return implode($pass);
+  }
+
   public function compareVestaStatus(){
 	  $vestaStatus = $this->getVestaStatus();
 	  $wpStatus = $this->getSubscriptionStatus();
@@ -158,7 +170,7 @@ as there being so many copies of the user class with so many copies of the api w
 	  } elseif ($vestaStatus == "no" && ($wpStatus == "cancelled" || $wpStatus == "expired")) {
 		  echo "User $this->userName needs to be suspended\n";
 	  } else {
-echo "User status appropriately synched between vesta and wp for $this->userName\n";
+		  echo "User status appropriately synched between vesta and wp for $this->userName\n";
 	  }
   }
 
@@ -166,6 +178,16 @@ echo "User status appropriately synched between vesta and wp for $this->userName
   public function existsOnVesta(){
 	  //returns null if the user doesn't exist on the vesta system
 	  return $this->api->fetchVestaData($this->userName);
+  }
+
+  public function createOnVesta(){
+	  $username = $this->userName;
+	  $password =  $this->generateRandomPassword();
+	  //$email = get from WP
+	  //$package = get from WP -- subscription name method
+	  //$first_name = get from WP usermeta -- ms_name
+
+	  $this->api->createNewUser($username, $password, $email, $package, $first_name);
   }
 
 
@@ -218,6 +240,7 @@ class VestaApi {
 		// Check result
 		if($answer == 0) {
 			echo "User account has been successfuly created\n";
+			//TODO send out a notification e-mail to the relevant address(es)
 			return true;
 		} else {
 			echo "Query returned error code: " .$answer. "\n";
@@ -259,4 +282,9 @@ class VestaApi {
 		}
 	}
 
+//TODO create method for suspending user
+
+//TODO create method for unsuspending user
 }
+
+//TODO create a mailer class for sending out mail notifications using SMTP
