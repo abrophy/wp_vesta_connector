@@ -217,6 +217,7 @@ as there being so many copies of the user class with so many copies of the api w
 		  if($vestaStatus == "yes" && $wpStatus == "active"){
 			  //TODO create appropriate functions to handle suspension and unsuspension of accounts below
 			  echo "User $this->userName needs to be unsuspended\n";
+			  //TODO make sure that user is also suspended if there are absolutely no subscriptions active for their account
 		  } elseif ($vestaStatus == "no" && ($wpStatus == "cancelled" || $wpStatus == "expired")) {
 			  echo "User $this->userName needs to be suspended\n";
 		  } else {
