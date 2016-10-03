@@ -199,7 +199,7 @@ as there being so many copies of the user class with so many copies of the api w
 		  $username = $this->userName;
 		  $password =  $this->generateRandomPassword();
 		  $email = $this->email;
-		  //$package = get from WP -- subscription name method
+		  $package = $this->getSubscriptionName();
 		  //$first_name = get from WP usermeta -- ms_name
 
 		  $this->api->createNewUser($username, $password, $email, $package, $first_name);
