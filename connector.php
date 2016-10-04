@@ -3,9 +3,10 @@
 // pull in values from environment variables
 
 //TODO refactor these into arrays so as to make it easier to pass them into constructors
-$db_data = parse_ini_file("db.ini");
-$vst_data = parse_ini_file("vst.ini");
-$whitelisted_users = parse_ini_file("user-whitelist.ini")["users"];
+$config_data = parse_ini_file("config.ini", true);
+$db_data = $config_data["db"];
+$vst_data = $config_data["vst"];
+$whitelisted_users = $config_data["user_whitelist"]["users"];
 
 $vst_hostname = $vst_data['vst_hostname'];
 $vst_username = $vst_data['vst_username'];
@@ -15,8 +16,10 @@ $db_name = $db_data['db_name'];
 $db_username = $db_data['db_username'];
 $db_password = $db_data['db_password'];
 
+$packages = $db_data['packages'];
+
 //instantiate the Connector
-$api = new VestaApi($vst_hostname, $vst_username, $vst_password);
+$api = new VestaApi($vst_hostname, $vst_username, $vst_password, $packages);
 $connector = new Connector($db_username, $db_password, $db_name, $whitelisted_users, $api );
 
 /*
@@ -88,6 +91,7 @@ class VestaUser {
   public $email;
   public $firstName;
   public $lastName;
+  public $packages;
 
 /*TODO:
  move the api back out of the class,
@@ -95,13 +99,14 @@ as there being so many copies of the user class with so many copies of the api w
 */
   public $api;
 
-  function __construct($row, $api, $conn){
+  function __construct($row, $api, $conn, $packages){
     $this->userId = $row['user_id'];
     $this->userName = $row['meta_value'];
     $this->api = $api;
     $this->email = $this->getEmailAddress($conn);
     $this->firstName = $this->getFirstName($conn);
     $this->lastName = $this->getLastName($conn);
+    $this->packages = $packages;
   }
 
   public function updateSubscriptionData($conn){
@@ -154,7 +159,7 @@ as there being so many copies of the user class with so many copies of the api w
   }
 
   public function getSubscriptionName(){
-	  $subsArray = parse_ini_file("packages.ini");
+	  $subsArray = $this->packages;
 	  $subsName = $this->subscriptions["membership"]["\0*\0name"];
 	  return $subsArray[$subsName];
   }
