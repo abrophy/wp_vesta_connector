@@ -4,12 +4,8 @@ This script is intended to synch users between a wordpress installation running 
 
 ## SETUP
 
-### CONFIGURE DATABASE CREDENTIALS
+### CONFIGURE THE CONNECTOR
 
-Create a db.ini file for database credentials by copying
-[example-db.ini](./example-db.ini)
-
-### CONFIGURE VESTA CREDENTIALS
-
-Create a vst.ini file for vesta credentials by copying
-[example-vst.ini](./example-vst.ini)
+Create a config.ini file in the root directory by copying
+[sample-config.ini](./sample-config.ini)
+and then filling in the appropriate settings for your server
