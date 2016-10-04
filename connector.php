@@ -16,11 +16,11 @@ $db_name = $db_data['db_name'];
 $db_username = $db_data['db_username'];
 $db_password = $db_data['db_password'];
 
-$packages = $db_data['packages'];
+$packages = $config_data['packages'];
 
 //instantiate the Connector
 $api = new VestaApi($vst_hostname, $vst_username, $vst_password, $packages);
-$connector = new Connector($db_username, $db_password, $db_name, $whitelisted_users, $api );
+$connector = new Connector($db_username, $db_password, $db_name, $whitelisted_users, $api, $packages );
 
 /*
  * SYNCHRONIZE!
@@ -32,9 +32,11 @@ class Connector {
   public $users = [];
   public $whitelisted_users = [];
   public $api;
+  public $packages;
 
-  function __construct($db_username, $db_password, $db_name, $whitelisted_users, $api) {
+  function __construct($db_username, $db_password, $db_name, $whitelisted_users, $api, $packages) {
 //Note currently configured to work with local DB's only
+	  $this->packages = $packages;
 	  $this->whitelisted_users = $whitelisted_users;
 	  $this->api = $api;
     $conn = new mysqli('localhost', $db_username, $db_password, $db_name );
@@ -49,24 +51,24 @@ class Connector {
   }
 
   function getUsers($conn){
-    //clear any previous users
-    unset($this->users);
-    $this->users = [];
+	  //clear any previous users
+	  unset($this->users);
+	  $this->users = [];
 
-    $sql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "ms_username"';
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-      // output data of each row
-      while($row = $result->fetch_assoc()) {
-	      if(!in_array($row['meta_value'], $this->whitelisted_users)){
-		      echo 'CREATING USER INSTANCE: name: ' . $row['meta_value'] . "\n";
-		      $this->users[] = new VestaUser($row, $this->api, $conn);
-	      }
-      }
-    } else {
-      //TODO better handling of missing data here
-      echo "0 results\n";
-    }
+	  $sql = 'SELECT * from cs3wv_usermeta WHERE meta_key = "ms_username"';
+	  $result = $conn->query($sql);
+	  if ($result->num_rows > 0) {
+		  // output data of each row
+		  while($row = $result->fetch_assoc()) {
+			  if(!in_array($row['meta_value'], $this->whitelisted_users)){
+				  echo 'CREATING USER INSTANCE: name: ' . $row['meta_value'] . "\n";
+				  $this->users[] = new VestaUser($row, $this->api, $conn, $this->packages);
+			  }
+		  }
+	  } else {
+		  //TODO better handling of missing data here
+		  echo "0 results\n";
+	  }
   }
 
   function synchUserStatuses(){
