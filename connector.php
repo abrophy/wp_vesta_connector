@@ -162,7 +162,7 @@ as there being so many copies of the user class with so many copies of the api w
 
   public function getSubscriptionName(){
 	  $subsArray = $this->packages;
-	  $subsName = $this->subscriptions["membership"]["\0*\0name"];
+	  $subsName = $this->subscriptions["membership"]["\0*\0id"];
 	  return $subsArray[$subsName];
   }
 
