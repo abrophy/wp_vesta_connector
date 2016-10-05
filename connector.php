@@ -157,7 +157,11 @@ as there being so many copies of the user class with so many copies of the api w
   }
 
   public function getSubscriptionStatus(){
-	  return $this->subscriptions["\0*\0status"];
+	  if (array_key_exists("\0*\0status", $this->subscriptions)){
+		  return $this->subscriptions["\0*\0status"];
+	  } else {
+		  return "no subscription";
+	  }
   }
 
   public function getSubscriptionName(){
