@@ -320,7 +320,7 @@ class VestaApi {
 		$answer = curl_exec($curl);
 
 		// Check result
-//TODO the below test is not working to determine if the user was created successfully
+		//TODO the below test is not working to determine if the user was created successfully
 		echo "RETURNING ANSWER: $answer";
 		if($answer == 0) {
 			echo "User account has been successfuly created\n";
@@ -422,7 +422,6 @@ class VestaApi {
 		echo "$username USER UNSUSPENDED: $answer\n"; 
 	}
 
-//TODO create method for unsuspending user
 }
 
 //TODO create a mailer class for sending out mail notifications using SMTP
