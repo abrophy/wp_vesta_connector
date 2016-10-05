@@ -28,6 +28,9 @@ $connector = new Connector($db_username, $db_password, $db_name, $whitelisted_us
  */
 $connector->synchUserStatuses();
 
+echo "<br><br><h1 align=\"center\">User sync has completed!</h1>";
+echo "<h2 align=\"center\"><a href=\"https://$vst_hostname:8083\">Control Panel Login</a></h2>";
+
 class Connector {
   public $users = [];
   public $whitelisted_users = [];
