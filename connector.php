@@ -81,10 +81,21 @@ class Connector {
   function synchUserStatuses(){
 	  foreach($this->users as $user){
 		  if($user->existsOnVesta()){
+			  array_splice($this->vestaUsers, array_search($user,$this->vestaUsers), 1);
 			  $user->compareVestaStatus();
 		  } else {
 			  echo "user $user->userName needs to be created\n";
 			  $user->createOnVesta();
+		  }
+	  }
+
+	  //suspend any users that are on vesta but not on WP that aren't already suspended
+	  var_dump($this->vestaUsers);
+	  foreach($this->vestaUsers as $user){
+		  $vestaStatus = $this->api->fetchVestaData($user)[$user]["SUSPENDED"];
+		  if($vestaStatus == "no"){
+			  echo "Suspending user $user as it does not exist on WP\n";
+			  $this->api->suspendOnVesta($user);
 		  }
 	  }
   }
