@@ -33,6 +33,7 @@ class Connector {
   public $whitelisted_users = [];
   public $api;
   public $packages;
+  public $vestaUsers = [];
 
   function __construct($db_username, $db_password, $db_name, $whitelisted_users, $api, $packages) {
 //Note currently configured to work with local DB's only
@@ -68,6 +69,12 @@ class Connector {
 	  } else {
 		  //TODO better handling of missing data here
 		  echo "0 results\n";
+	  }
+	  $fetchedUsers = $this->api->fetchAllUsers();
+	  foreach($fetchedUsers as $key => $value){
+		  if(!in_array($key, $this->whitelisted_users)){
+			  $this->vestaUsers[] = $key;
+		  }
 	  }
   }
 
