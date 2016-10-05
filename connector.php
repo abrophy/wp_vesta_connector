@@ -1,5 +1,11 @@
 <?php
 
+/*TODO
+seeing as this script will be embedded into webpages
+make a configurable variable that will make this script less verbose
+stopping unwanted echo's from reaching a user
+*/
+
 // pull in values from environment variables
 
 //TODO refactor these into arrays so as to make it easier to pass them into constructors
