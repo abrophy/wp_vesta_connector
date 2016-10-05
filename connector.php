@@ -227,22 +227,35 @@ as there being so many copies of the user class with so many copies of the api w
 	  }
   }
 
-	  public function compareVestaStatus(){
-		  $vestaStatus = $this->getVestaStatus();
-		  $wpStatus = $this->getSubscriptionStatus();
+  public function compareVestaStatus(){
+	  $vestaStatus = $this->getVestaStatus();
+	  $wpStatus = $this->getSubscriptionStatus();
 
-		  if($vestaStatus == "yes" && $wpStatus == "active"){
-//TODO create convenience functions in the user class that automatically calls this method with the username
-			  echo "User $this->userName needs to be unsuspended\n";
-$this->api->unsuspendOnVesta($this->userName);
-			  //TODO make sure that user is also suspended if there are absolutely no subscriptions active for their account
-		  } elseif ($vestaStatus == "no" && ($wpStatus == "cancelled" || $wpStatus == "expired")) {
-			  echo "User $this->userName needs to be suspended\n";
-			  $this->api->suspendOnVesta($this->userName);
-		  } else {
-			  echo "User status appropriately synched between vesta and wp for $this->userName\n";
+	  if($vestaStatus == "yes" && $wpStatus == "active"){
+		  //TODO create convenience functions in the user class that automatically calls this method with the username
+		  echo "User $this->userName needs to be unsuspended\n";
+		  $this->api->unsuspendOnVesta($this->userName);
+	  } elseif ($vestaStatus == "no"){
+		  switch($wpStatus){
+			  case "cancelled":
+				  echo "User $this->userName needs to be suspended\n";
+				  $this->api->suspendOnVesta($this->userName);
+				  break;
+
+			  case "expired":
+				  echo "User $this->userName needs to be suspended\n";
+				  $this->api->suspendOnVesta($this->userName);
+				  break;
+
+			  case "no subscription":
+				  echo "User $this->userName needs to be suspended\n";
+				  $this->api->suspendOnVesta($this->userName);
+				  break;
 		  }
+	  } else {
+		  echo "User status appropriately synched between vesta and wp for $this->userName\n";
 	  }
+  }
 
 
 	  public function existsOnVesta(){
