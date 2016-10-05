@@ -367,6 +367,40 @@ class VestaApi {
 		}
 	}
 
+
+	public function fetchAllUsers(){
+
+		// Prepare POST query
+		$postvars = array(
+				'user' => $this->vst_username,
+				'password' => $this->vst_password,
+				'returncode' => 'no',
+				'cmd' => 'v-list-users',
+				'arg1' => 'json',
+				);
+		$postdata = http_build_query($postvars);
+
+		// Send POST query via cURL
+		$postdata = http_build_query($postvars);
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, 'https://' . $this->vst_hostname . ':8083/api/');
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+		curl_setopt($curl, CURLOPT_POST, true);
+		curl_setopt($curl, CURLOPT_POSTFIELDS, $postdata);
+		$answer = curl_exec($curl);
+
+		// Check result
+		$decodedJson = json_decode($answer, true);
+		if ($decodedJson == null){
+			//user does not exist
+			return false;
+		} else {
+			return $decodedJson;
+		}
+	}
+
 //TODO create method for suspending user
 	public function suspendOnVesta($username){
 
