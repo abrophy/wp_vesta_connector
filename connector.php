@@ -8,7 +8,7 @@ stopping unwanted echo's from reaching a user
 
 // REQUIRE NEEDED LIBRARIES
 
-require 'PHPMAILER/PHPMailerAutoload.php';
+require 'PHPMailer/PHPMailerAutoload.php';
 
 // pull in values from environment variables
 
@@ -48,7 +48,7 @@ class Connector {
   public $api;
   public $packages;
   public $vestaUsers = [];
-  private $mailer;
+  public $mailer;
 
   function __construct($db_username, $db_password, $db_name, $whitelisted_users, $api, $packages, $mailerData) {
 //Note currently configured to work with local DB's only
@@ -521,15 +521,15 @@ class MailHandler {
 		return $mail;
 	}
 
-	function notifyCreated($username){
+	public function notifyCreated($username){
 		$mail = $this->setupMailer();
 		foreach($this->mailerData["admin_addresses"] as $admin_address){
 			$mail->addAddress($admin_address);
 		}
 		$mail->Subject = "User $username Created on Vesta";
-		$this->mail->Body = "<h1>$username Created on Vesta</h1>\n" .
+		$mail->Body = "<h1>$username Created on Vesta</h1>\n" .
 			"<p>The user has been successfully created on Vesta</p>";
-		$this->mail->AltBody = "$username created on vesta\n".
+		$mail->AltBody = "$username created on vesta\n".
 			"---\n" .
 			"The user has been successfully created on vesta";
 		//TODO add their subscription type and other info to this body
