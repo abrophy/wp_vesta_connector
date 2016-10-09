@@ -543,6 +543,32 @@ class MailHandler {
 		}
 	}
 
+	public function notifySuspended($username, $reason){
+		$mail = $this->setupMailer();
+		foreach($this->mailerData["admin_addresses"] as $admin_address){
+			$mail->addAddress($admin_address);
+		}
+		$mail->Subject = "User $username Suspended on Vesta";
+		$mail->Body = "<h1>$username Suspended on Vesta</h1>\n" .
+			"<p>The user has been successfully suspended on Vesta</p>" .
+			"<h2>Reason:</h2>" .
+			"<p>$reason</p>";
+		$mail->AltBody = "$username suspended on vesta\n".
+			"---\n" .
+			"The user has been successfully suspended on vesta\n" .
+			"REASON:\n" .
+			"$reason";
+		//TODO add their subscription type and other info to this body
+
+		//SEND the email
+		if(!$mail->send()) {
+			echo 'Message could not be sent.';
+			echo 'Mailer Error: ' . $mail->ErrorInfo;
+		} else {
+			echo 'Message has been sent';
+		}
+	}
+
 	/*
 	if(!$mail->send()) {
 	echo 'Message could not be sent.';
