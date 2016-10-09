@@ -568,5 +568,27 @@ class MailHandler {
 			echo 'Message has been sent';
 		}
 	}
+
+	public function notifyUnsuspended($username){
+		$mail = $this->setupMailer();
+		foreach($this->mailerData["admin_addresses"] as $admin_address){
+			$mail->addAddress($admin_address);
+		}
+		$mail->Subject = "User $username unSuspended on Vesta";
+		$mail->Body = "<h1>$username Unsuspended on Vesta</h1>\n" .
+			"<p>The user has been successfully unsuspended on Vesta</p>";
+		$mail->AltBody = "$username unsuspended on vesta\n".
+			"---\n" .
+			"The user has been successfully unsuspended on vesta\n";
+		//TODO add their subscription type and other info to this body
+
+		//SEND the email
+		if(!$mail->send()) {
+			echo 'Message could not be sent.';
+			echo 'Mailer Error: ' . $mail->ErrorInfo;
+		} else {
+			echo 'Message has been sent';
+		}
+	}
 }
 
