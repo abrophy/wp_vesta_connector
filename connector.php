@@ -504,6 +504,21 @@ class MailHandler {
 		$this->mailerData = $mailerData;
 	}
 
+	function setupMailer(){
+		$mail = new PHPMailer;
+		$mail->isSMTP();                                      // Set mailer to use SMTP
+		$mail->Host = $this->mailerData["smtp_host"];  // Specify main and backup SMTP servers
+		$mail->SMTPAuth = true;                               // Enable SMTP authentication
+		$mail->Username = $this->mailerData["smtp_username"];                 // SMTP username
+		$mail->Password = $this->mailerData["smtp_password"];                           // SMTP password
+		$mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+		$mail->Port = $this->mailerData["smtp_port"];                                    // TCP port to connect to
+
+		$mail->setFrom($this->mailerData["from_address"], 'Mailer');
+		return $mail;
+	}
+	
+
 
 	/*
 
