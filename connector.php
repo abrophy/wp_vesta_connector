@@ -55,6 +55,10 @@ class Connector {
 	  $this->packages = $packages;
 	  $this->whitelisted_users = $whitelisted_users;
 	  $this->api = $api;
+	  $this->mailer = new MailHandler($mailerData);
+	  // TODO hacky dumping of mailer into the api instance
+	  // clean it up
+	  $this->api->mailer = $this->mailer;
     $conn = new mysqli('localhost', $db_username, $db_password, $db_name );
     if ($conn->connect_error) {
           die('Connection failed: ' . $conn->connect_error);
@@ -66,7 +70,6 @@ class Connector {
     $conn->close();
 
     //create the mailer
-    $this->mailer = new MailHandler($mailerData);
   }
 
   function getUsers($conn){
@@ -266,6 +269,7 @@ as there being so many copies of the user class with so many copies of the api w
 	  $vestaStatus = $this->getVestaStatus();
 	  $wpStatus = $this->getSubscriptionStatus();
 
+//TODO for each of these comparison cases call notification mailers with the appropriate messages
 	  if($vestaStatus == "yes" && $wpStatus == "active"){
 		  //TODO create convenience functions in the user class that automatically calls this method with the username
 		  echo "User $this->userName needs to be unsuspended\n";
@@ -314,11 +318,14 @@ as there being so many copies of the user class with so many copies of the api w
 
 class VestaApi {
 
+	//TODO inject the mailer class into the API on construction
+
 	// Server credentials
 	private $vst_hostname;
 	private $vst_username;
 	private $vst_password;
 	private $vst_returncode;
+	public $mailer;
 
 	function __construct($hostname, $username, $password){
 		$this->vst_hostname = $hostname;
