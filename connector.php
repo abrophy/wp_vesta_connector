@@ -504,8 +504,9 @@ class MailHandler {
 		$this->mailerData = $mailerData;
 	}
 
-	function setupMailer(){
+	private function setupMailer(){
 		$mail = new PHPMailer;
+		//$mail->SMTPDebug = 3;                               // Enable verbose debug output
 		$mail->isSMTP();                                      // Set mailer to use SMTP
 		$mail->Host = $this->mailerData["smtp_host"];  // Specify main and backup SMTP servers
 		$mail->SMTPAuth = true;                               // Enable SMTP authentication
@@ -515,38 +516,34 @@ class MailHandler {
 		$mail->Port = $this->mailerData["smtp_port"];                                    // TCP port to connect to
 
 		$mail->setFrom($this->mailerData["from_address"], 'Mailer');
+		$mail->addReplyTo($this->mailerData["from_address"]);
+		$mail->isHTML(true);
 		return $mail;
 	}
-	
 
+	function notifyCreated($username){
+		$mail = $this->setupMailer();
+		foreach($this->mailerData["admin_addresses"] as $admin_address){
+			$mail->addAddress($admin_address);
+		}
+		$mail->Subject = "User $username Created on Vesta";
+		$this->mail->Body = "<h1>$username Created on Vesta</h1>\n" .
+			"<p>The user has been successfully created on Vesta</p>";
+		$this->mail->AltBody = "$username created on vesta\n".
+			"---\n" .
+			"The user has been successfully created on vesta";
+		//TODO add their subscription type and other info to this body
+
+		//SEND the email
+		if(!$mail->send()) {
+			echo 'Message could not be sent.';
+			echo 'Mailer Error: ' . $mail->ErrorInfo;
+		} else {
+			echo 'Message has been sent';
+		}
+	}
 
 	/*
-
-	//$mail->SMTPDebug = 3;                               // Enable verbose debug output
-
-	$this->mail->isSMTP();                                      // Set mailer to use SMTP
-	$this->mail->Host = 'smtp1.example.com;smtp2.example.com';  // Specify main and backup SMTP servers
-	$this->mail->SMTPAuth = true;                               // Enable SMTP authentication
-	$this->mail->Username = 'user@example.com';                 // SMTP username
-	$this->mail->Password = 'secret';                           // SMTP password
-	$this->mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
-	$this->mail->Port = 587;                                    // TCP port to connect to
-
-	$this->mail->setFrom('from@example.com', 'Mailer');
-	$this->mail->addAddress('joe@example.net', 'Joe User');     // Add a recipient
-	$this->mail->addAddress('ellen@example.com');               // Name is optional
-	$this->mail->addReplyTo('info@example.com', 'Information');
-	$this->mail->addCC('cc@example.com');
-	$this->mail->addBCC('bcc@example.com');
-
-	$this->mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
-	$this->mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
-	$this->mail->isHTML(true);                                  // Set email format to HTML
-	this->
-	$this->mail->Subject = 'Here is the subject';
-	$this->mail->Body    = 'This is the HTML message body <b>in bold!</b>';
-	$this->mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
-
 	if(!$mail->send()) {
 	echo 'Message could not be sent.';
 	echo 'Mailer Error: ' . $mail->ErrorInfo;
