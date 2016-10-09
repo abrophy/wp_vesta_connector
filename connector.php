@@ -6,6 +6,10 @@ make a configurable variable that will make this script less verbose
 stopping unwanted echo's from reaching a user
 */
 
+// REQUIRE NEEDED LIBRARIES
+
+require 'PHPMAILER/PHPMailerAutoload.php';
+
 // pull in values from environment variables
 
 //TODO refactor these into arrays so as to make it easier to pass them into constructors
@@ -13,6 +17,7 @@ $config_data = parse_ini_file("config.ini", true);
 $db_data = $config_data["db"];
 $vst_data = $config_data["vst"];
 $whitelisted_users = $config_data["user_whitelist"]["users"];
+$mailer_data = $config_data["mailer"];
 
 $vst_hostname = $vst_data['vst_hostname'];
 $vst_username = $vst_data['vst_username'];
@@ -26,7 +31,7 @@ $packages = $config_data['packages'];
 
 //instantiate the Connector
 $api = new VestaApi($vst_hostname, $vst_username, $vst_password, $packages);
-$connector = new Connector($db_username, $db_password, $db_name, $whitelisted_users, $api, $packages );
+$connector = new Connector($db_username, $db_password, $db_name, $whitelisted_users, $api, $packages , $mailer_data);
 
 /*
  * SYNCHRONIZE!
@@ -43,8 +48,9 @@ class Connector {
   public $api;
   public $packages;
   public $vestaUsers = [];
+  private $mailer;
 
-  function __construct($db_username, $db_password, $db_name, $whitelisted_users, $api, $packages) {
+  function __construct($db_username, $db_password, $db_name, $whitelisted_users, $api, $packages, $mailerData) {
 //Note currently configured to work with local DB's only
 	  $this->packages = $packages;
 	  $this->whitelisted_users = $whitelisted_users;
@@ -58,6 +64,9 @@ class Connector {
       $user->updateSubscriptionData($conn);
     }
     $conn->close();
+
+    //create the mailer
+    $this->mailer = new MailHandler($mailerData);
   }
 
   function getUsers($conn){
@@ -485,3 +494,50 @@ class VestaApi {
 }
 
 //TODO create a mailer class for sending out mail notifications using SMTP
+
+class MailHandler {
+
+	private $mailerData;
+
+	function __construct($mailerData){
+		//pull in mailer data from config
+		$this->mailerData = $mailerData;
+	}
+
+
+	/*
+
+	//$mail->SMTPDebug = 3;                               // Enable verbose debug output
+
+	$this->mail->isSMTP();                                      // Set mailer to use SMTP
+	$this->mail->Host = 'smtp1.example.com;smtp2.example.com';  // Specify main and backup SMTP servers
+	$this->mail->SMTPAuth = true;                               // Enable SMTP authentication
+	$this->mail->Username = 'user@example.com';                 // SMTP username
+	$this->mail->Password = 'secret';                           // SMTP password
+	$this->mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+	$this->mail->Port = 587;                                    // TCP port to connect to
+
+	$this->mail->setFrom('from@example.com', 'Mailer');
+	$this->mail->addAddress('joe@example.net', 'Joe User');     // Add a recipient
+	$this->mail->addAddress('ellen@example.com');               // Name is optional
+	$this->mail->addReplyTo('info@example.com', 'Information');
+	$this->mail->addCC('cc@example.com');
+	$this->mail->addBCC('bcc@example.com');
+
+	$this->mail->addAttachment('/var/tmp/file.tar.gz');         // Add attachments
+	$this->mail->addAttachment('/tmp/image.jpg', 'new.jpg');    // Optional name
+	$this->mail->isHTML(true);                                  // Set email format to HTML
+	this->
+	$this->mail->Subject = 'Here is the subject';
+	$this->mail->Body    = 'This is the HTML message body <b>in bold!</b>';
+	$this->mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+
+	if(!$mail->send()) {
+	echo 'Message could not be sent.';
+	echo 'Mailer Error: ' . $mail->ErrorInfo;
+	} else {
+	echo 'Message has been sent';
+	}
+	 */
+}
+
