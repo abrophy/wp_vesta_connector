@@ -103,7 +103,7 @@ class Connector {
 	  foreach($this->users as $user){
 		  if($user->existsOnVesta()){
 			  array_splice($this->vestaUsers, array_search($user->userName,$this->vestaUsers), 1);
-			  $user->compareVestaStatus();
+			  $user->compareVestaStatus($this->mailer);
 		  } else {
 			  echo "user $user->userName needs to be created\n";
 			  $user->createOnVesta();
@@ -267,7 +267,7 @@ as there being so many copies of the user class with so many copies of the api w
 	  }
   }
 
-  public function compareVestaStatus(){
+  public function compareVestaStatus($mailer){
 	  $vestaStatus = $this->getVestaStatus();
 	  $wpStatus = $this->getSubscriptionStatus();
 
@@ -281,19 +281,19 @@ as there being so many copies of the user class with so many copies of the api w
 			  case "cancelled":
 				  echo "User $this->userName needs to be suspended\n";
 				  $this->api->suspendOnVesta($this->userName);
-				  $this->mailer->notifySuspended($this->userName,"user subscription status shifted to cancelled");
+				  $mailer->notifySuspended($this->userName,"user subscription status shifted to cancelled");
 				  break;
 
 			  case "expired":
 				  echo "User $this->userName needs to be suspended\n";
 				  $this->api->suspendOnVesta($this->userName);
-				  $this->mailer->notifySuspended($this->userName,"user subscription status shifted to expired");
+				  $mailer->notifySuspended($this->userName,"user subscription status shifted to expired");
 				  break;
 
 			  case "no subscription":
 				  echo "User $this->userName needs to be suspended\n";
 				  $this->api->suspendOnVesta($this->userName);
-				  $this->mailer->notifySuspended($this->userName,"user account has no subscriptions active or configured");
+				  $mailer->notifySuspended($this->userName,"user account has no subscriptions active or configured");
 				  break;
 		  }
 	  } else {
