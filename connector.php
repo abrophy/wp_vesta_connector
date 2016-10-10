@@ -107,6 +107,7 @@ class Connector {
 		  } else {
 			  echo "user $user->userName needs to be created\n";
 			  $user->createOnVesta();
+			  $this->mailer->notifyCreated($user);
 		  }
 	  }
 
@@ -116,6 +117,7 @@ class Connector {
 		  if($vestaStatus == "no"){
 			  echo "Suspending user $user as it does not exist on WP\n";
 			  $this->api->suspendOnVesta($user);
+			  $this->mailer->notifySuspended($user,"Does not exist on WP member list");
 		  }
 	  }
   }
@@ -279,16 +281,19 @@ as there being so many copies of the user class with so many copies of the api w
 			  case "cancelled":
 				  echo "User $this->userName needs to be suspended\n";
 				  $this->api->suspendOnVesta($this->userName);
+				  $this->mailer->notifySuspended($this->userName,"user subscription status shifted to cancelled");
 				  break;
 
 			  case "expired":
 				  echo "User $this->userName needs to be suspended\n";
 				  $this->api->suspendOnVesta($this->userName);
+				  $this->mailer->notifySuspended($this->userName,"user subscription status shifted to expired");
 				  break;
 
 			  case "no subscription":
 				  echo "User $this->userName needs to be suspended\n";
 				  $this->api->suspendOnVesta($this->userName);
+				  $this->mailer->notifySuspended($this->userName,"user account has no subscriptions active or configured");
 				  break;
 		  }
 	  } else {
@@ -469,6 +474,7 @@ class VestaApi {
 
 		// Check result
 		echo "$username USER SUSPENDED: $answer\n"; 
+		//TODO appropriately check the status here and return it
 	}
 
 	public function unsuspendOnVesta($username){
