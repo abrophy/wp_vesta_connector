@@ -1,17 +1,11 @@
 RewriteEngine On
 RewriteBase /
 
-# Protect the htaccess file
-<Files ".htaccess">
+# Protect all files except one
 Order Allow,Deny
-Deny from all
-</Files>
-
-# Protect config.ini 
-<Files "config.ini">
-Order Allow,Deny
-Deny from all
-</Files>
+<FilesMatch "^connector\.php$">
+Allow from all
+</FilesMatch>
 
 # Disable directory browsing
 Options All -Indexes
